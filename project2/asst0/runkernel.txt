@@ -1,0 +1,50 @@
+Script started on Wed 27 Aug 2014 12:16:16 PM CDT
+]0;rbaldwin@localhost:~/cs161/asst0]7;file://localhost.localdomain/home/rbaldwin/cs161/asst0[?1034h[rbaldwin@localhost asst0]$ cd ~/cs161/root/
+]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ ./sys161 kernel
+sys161: Cannot open config file sys161.conf
+]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ ls
+[0m[38;5;27mbin[0m          [38;5;51mhub161[0m       [38;5;34mkernel-ASST0[0m  [38;5;51mstat161[0m       sys161.conf.sample
+[38;5;27mhostbin[0m      [38;5;34mhub161-1.12[0m  [38;5;27mlib[0m           [38;5;34mstat161-1.12[0m  [38;5;27mtestbin[0m
+[38;5;27mhostinclude[0m  [38;5;27minclude[0m      [38;5;27mman[0m           [38;5;51msys161[0m        [38;5;51mtrace161[0m
+[38;5;27mhostlib[0m      [38;5;51mkernel[0m       [38;5;27msbin[0m          [38;5;34msys161-1.12[0m   [38;5;34mtrace161-1.12[0m
+]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ ./sys161 kernel
+sys161: Cannot open config file sys161.conf
+]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ ./sys161-1.12 kernel
+sys161: Cannot open config file sys161.conf
+]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ ./sys161 kernel
+sys161: System/161 release 1.12, compiled Aug 27 2014 11:07:56
+
+OS/161 base system version 1.10
+Copyright (c) 2000, 2001, 2002, 2003
+   President and Fellows of Harvard College.  All rights reserved.
+
+Put-your-group-name-here's system version 0 (ASST0 #1)
+
+Cpu is MIPS r2000/r3000
+1884k physical memory available
+Device probe...
+lamebus0 (system main bus)
+emu0 at lamebus0
+ltrace0 at lamebus0
+ltimer0 at lamebus0
+hardclock on ltimer0 (100 hz)
+beep0 at ltimer0
+rtclock0 at ltimer0
+lrandom0 at lamebus0
+random0 at lrandom0
+lser0 at lamebus0
+con0 at lser0
+pseudorand0 (virtual)
+
+OS/161 kernel [? for menu]: p /sbin/poweroff
+Operation took 0.000152200 seconds
+OS/161 kernel [? for menu]: Shutting down.
+The system is halted.
+sys161: 702949609 cycles (6688564k, 19u, 696261026i)
+sys161: 3439 irqs 6 exns 0r/0w disk 18r/658w console 8r/0w/3m emufs 0r/0w net
+sys161: Elapsed real time: 28.078428 seconds (25.0352 mhz)
+sys161: Elapsed virtual time: 28.117984360 seconds (25 mhz)
+]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ exit
+exit
+
+Script done on Wed 27 Aug 2014 12:23:48 PM CDT
