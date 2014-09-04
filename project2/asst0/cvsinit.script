@@ -24,11 +24,14 @@ bash: ks: command not found...
 [38;5;27mcs161-gcc-1.4[0m           [38;5;27mos161-1.10[0m
 [38;5;9mcs161-gcc-1.4.tar[0m       [38;5;9mos161-1.10.tar.gz[0m
 ]0;rbaldwin@localhost:~/cs161]7;file://localhost.localdomain/home/rbaldwin/cs161[rbaldwin@localhost cs161]$ cd os161-1.10/
-]0;rbaldwin@localhost:~/cs161/os161-1.10]7;file://localhost.localdomain/home/rbaldwin/cs161/os161-1.10[rbaldwin@localhost os161-1.10]$ cvs import -m "Import of s[Kos16[K61 [K" src os161 os161 -1 10
+]0;rbaldwin@localhost:~/cs161/os161-1.10]7;file://localhost.localdomain/home/rbaldwin/cs161/os161-1.10[rbaldwin@localhost os161-1.10]$ cvs import -m "Import of s[Kos16[K61 [K" src os161 os161 
+-1 10
 cvs [import aborted]: tag `10' must start with a letter
-]0;rbaldwin@localhost:~/cs161/os161-1.10]7;file://localhost.localdomain/home/rbaldwin/cs161/os161-1.10[rbaldwin@localhost os161-1.10]$ cvs import -m "Import of os161" src os161 os161--1 10[1P10.10[C[C
+]0;rbaldwin@localhost:~/cs161/os161-1.10]7;file://localhost.localdomain/home/rbaldwin/cs161/os161-1.10[rbaldwin@localhost os161-1.10]$ cvs import -m "Import of os161" src os161 os161-
+-1 10[1P10.10[C[C
 cvs [import aborted]: tag `os161-1.10' must not contain the characters `$,.:;@/'
-]0;rbaldwin@localhost:~/cs161/os161-1.10]7;file://localhost.localdomain/home/rbaldwin/cs161/os161-1.10[rbaldwin@localhost os161-1.10]$ cvs import -m "Import of os161" src os161 os161--1.10[1P10_10[C[C
+]0;rbaldwin@localhost:~/cs161/os161-1.10]7;file://localhost.localdomain/home/rbaldwin/cs161/os161-1.10[rbaldwin@localhost os161-1.10]$ cvs import -m "Import of os161" src os161 os161-
+-1.10[1P10_10[C[C
 N src/.cvsignore
 N src/CHANGES
 N src/COPYING
