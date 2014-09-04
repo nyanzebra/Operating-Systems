@@ -1339,7 +1339,8 @@ make[2]: Leaving directory `/home/rbaldwin/cs161/src/kern'
 make[1]: Leaving directory `/home/rbaldwin/cs161/src'
 ]0;rbaldwin@localhost:~/cs161/src]7;file://localhost.localdomain/home/rbaldwin/cs161/src[rbaldwin@localhost src]$ cd ../root/
 ]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ ./sys161 kernel
-sys161: System/161 release 1.12, compiled Aug 27 2014 11:07:56
+sys161: System/161 release 1.12, compiled Aug 27 2014 11:07:56
+
 Hello World
 
 OS/161 base system version 1.10
@@ -1368,10 +1369,14 @@ OS/161 kernel [? for menu]: p /sbin/poweroff
 Operation took 0.000152200 seconds
 OS/161 kernel [? for menu]: Shutting down.
 The system is halted.
-sys161: 702710627 cycles (6723710k, 19u, 695986898i)
-sys161: 3451 irqs 6 exns 0r/0w disk 19r/670w console 8r/0w/3m emufs 0r/0w net
-sys161: Elapsed real time: 28.106825 seconds (25.0014 mhz)
-sys161: Elapsed virtual time: 28.108425080 seconds (25 mhz)
+sys161: 702710627 cycles (6723710k, 19u, 695986898i)
+
+sys161: 3451 irqs 6 exns 0r/0w disk 19r/670w console 8r/0w/3m emufs 0r/0w net
+
+sys161: Elapsed real time: 28.106825 seconds (25.0014 mhz)
+
+sys161: Elapsed virtual time: 28.108425080 seconds (25 mhz)
+
 ]0;rbaldwin@localhost:~/cs161/root]7;file://localhost.localdomain/home/rbaldwin/cs161/root[rbaldwin@localhost root]$ exit
 exit
 
