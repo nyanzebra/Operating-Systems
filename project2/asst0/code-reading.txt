@@ -1,22 +1,29 @@
+Project 2
+Group 12
+Robert Baldwin
+Jonathan Hart
+
+Code Reading Answers
+
 1. 29
-2. LAMEbus
-3. splhigh sets spl to the highest value, disable all interupts. spl0 enables all interrupts
+2. OS/161 only supports LAMEbus.
+3. splhigh sets spl to the highest value, disable all interupts. spl0 enables all interrupts.
 4. It is clarifying that it is used solely for unsigned integers of size 32 bits
-5. returns the state parameter
+5. “spix” returns the state parameter.
 6. 15
-7. 100
-8. set,clear,get,sync,getroot,getdevname,...
-9. 32
-10. 3 rw,r,w 
-11. sync,getvolume,getroot,unmount
+7. 100 times a second.
+8. set, clear, get, sync, getroot, getdevname, lookup, lookparent, open, readlink, symlink, mkdir, link, remove, rmdir, rename, chdir, getcwd, close, bootstrap, initbootfs, setbootfs, clearbootfs, adddev, addfs, mount, unmount, unmountall
+9. 32 characters
+10. 3 direct blocks: rw, r, w 
+11. sync, getvolume, getroot, unmount
 12. thread_sleep
 13. 32 bit integers
-14. open, close,read,write,etc...
-15.	1024
+14. ***open, close, reclaim, read, readlink, getdirentry, write, ioctl, stat, gettype, tryseek, fsync, mmap, truncate, namefile, creat, symlink, mkdir, link, remove, rmdir, rename, lookup, lookparent
+15. 1024 characters
 16. 8
 17. kern/unistd.h
-18. yes the scheduler just creates a run queue, and the thread initializes the first thread.
-19. disposable thread
+18. Yes, the scheduler just creates a run queue, and the thread initializes the first thread.
+19. A dead thread that can be disposed of.
 20. 32
 21. DEVNAME:x/y/z
 22. DEVNAMEraw:x/y/z
