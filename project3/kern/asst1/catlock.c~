@@ -1,0 +1,432 @@
+/*
+ * catlock.c
+ *
+ * 30-1-2003 : GWA : Stub functions created for CS161 Asst1.
+ *
+ * NB: Please use LOCKS/CV'S to solve the cat syncronization problem in 
+ * this file.
+ */
+
+
+/*
+ * 
+ * Includes
+ *
+ */
+
+#include <types.h>
+#include <lib.h>
+#include <test.h>
+#include <thread.h>
+
+
+/*
+ * 
+ * Constants
+ *
+ */
+
+/*
+ * Number of food bowls.
+ */
+
+#define NFOODBOWLS 2
+
+/*
+ * Number of cats.
+ */
+
+#define NCATS 6
+
+/*
+ * Number of mice.
+ */
+
+#define NMICE 2
+
+// Define max number of times an animal can eat
+#define MAX_MEALS 3
+
+/*
+ * Lock declarations
+ */
+ 	// Create locks for each of our bowls
+	struct lock * bowl0;
+	struct lock * bowl1;
+
+	// Declare array to keep track of our bowls' status
+	// Index 0 is bowl 1 and index 1 is bowl 2
+	int bowls[2] = {0,0};
+
+	struct lock * mutex;
+	
+	// Declare array to keep track of our cats' status
+	// Indxe 0 implies not eating, index 1 implies eating.
+	int cat[6] = {0,0,0,0,0,0};
+	int mouse[2] = {0,0};
+	
+	// Iterations of each animal
+	// This is used to make sure there isnt one animal hogging
+	// the food
+	int it_c[6] = {0,0,0,0,0,0};
+	int it_m[2] = {0,0};
+
+/*
+ * 
+ * Function Definitions
+ * 
+ */
+
+/* who should be "cat" or "mouse" */
+static void
+lock_eat(const char *who, int num, int bowl, int iteration)
+{
+        kprintf("%s: %d starts eating: bowl %d, iteration %d\n", who, num,
+                bowl, iteration);
+        clocksleep(1);
+        kprintf("%s: %d ends eating: bowl %d, iteration %d\n", who, num,
+                bowl, iteration);
+}
+
+
+/*
+ * catlock()
+ *
+ * Arguments:
+ *      void * unusedpointer: currently unused.
+ *      unsigned long catnumber: holds the cat identifier from 0 to NCATS -
+ *      1.
+ *
+ * Returns:
+ *      nothing.
+ *
+ * Notes:
+ *      Write and comment this function using locks/cv's.
+ *
+ */
+
+static
+void
+catlock(void * unusedpointer, 
+        unsigned long catnumber)
+{
+	
+ 	while (it_c[catnumber] < 4)
+    {
+	// Check if cat is currently eating
+        if (cat[catnumber] == 0)
+        {
+            // Aqquire access to the bowl's status
+            lock_acquire(mutex);
+
+            // Check if mice are eating
+            // There is a more efficent way to do this...but we havent implemented it yet
+            if (mouse[0] != 1 && mouse[1] != 1)
+            {
+            // In this case, both bowls are free.
+            if (bowls[0] == 0 && bowls[1] == 0) //both bowl are free, choose random bowl
+            {
+                // Generate a random number to choose between bowls.
+					// The random number can only be 0 and 1, so it will correspond to the
+					// index of a bowl
+					int randomBowlNum = random() % 2;
+					
+					// ...then go for the chosen bowl
+                                        if (randomBowlNum == 0)
+                                        {
+                                               	// Grab the bowl and change the status of the bowl 
+						// and the cat to eating (1)
+						lock_acquire(bowl0);
+                                                bowls[0] = 1;
+                                                cat[catnumber] = 1;
+						
+						// Relenquish access to the bowl's status
+                                                lock_release(mutex);
+
+						// Eat from the bowl
+                                                lock_eat("cat", catnumber, 1, it_c[catnumber]);
+						
+						// Aqquire access to the bowl's status
+                                                lock_acquire(mutex);
+
+						// When finished, release bowl and change status of the bowl 
+						// and the cat to not eating (0)
+                                                bowls[0] = 0;
+						cat[catnumber] = 0;
+                                                lock_release(bowl0);
+                                                
+                                                it_c[catnumber]++;
+                                        }                                     
+                                        else if (randomBowlNum == 1)
+                                        {
+                                               	// Grab the bowl and change the status of the bowl 
+						// and the cat to eating (1)
+                                                lock_acquire(bowl1);
+                                                bowls[1] = 1;
+                                                cat[catnumber] = 1;
+
+                                                lock_release(mutex);
+
+						// Eat from the bowl
+                                                lock_eat("cat", catnumber, 2, it_c[catnumber]);
+
+                                                lock_acquire(mutex);
+
+						// When finished, release bowl and change status of the bowl 
+						// and the cat to not eating (0)
+                                                bowls[1] = 0;
+                                                lock_release(bowl1);
+                                                cat[catnumber] = 0;
+
+                                                it_c[catnumber]++;
+                                        }
+                                }
+				// If the first bowl is free but the second bowl is used.
+                                else if (bowls[0] == 0 && bowls[1] == 1) //bowl 1 free, bowl 2 used by fellow cat
+                                {
+                                        
+                                        // Grab the bowl and change the status of the bowl 
+					// and the cat to eating (1)
+					lock_acquire(bowl0);
+                                        bowls[0] = 1;
+                                        cat[catnumber] = 1;
+
+                                        lock_release(mutex);
+
+					// Eat from the bowl
+                                        lock_eat("cat", catnumber, 1, it_c[catnumber]);
+
+                                        lock_acquire(mutex);
+
+					// When finished, release bowl and change status of the bowl 
+					// and the cat to not eating (0)
+                                        bowls[0] = 0;
+                                        lock_release(bowl0);
+                                        cat[catnumber] = 0;
+
+                                        it_c[catnumber]++;
+                                }
+				// If the first bowl is used and the second bowl is free.
+                                else if (bowls[0] == 1 && bowls[0] == 0) //bowl 2 free, bowl 1 used by fellow cat
+                                {
+                                        // Grab the bowl and change the status of the bowl 
+					// and the cat to eating (1)
+                                        lock_acquire(bowl1);
+                                        bowls[1] = 1;
+                                        cat[catnumber] = 1;
+
+                                        lock_release(mutex);
+
+					// Eat from the bowl
+                                        lock_eat("cat", catnumber, 2, it_c[catnumber]);
+
+                                        lock_acquire(mutex);
+
+					// When finished, release bowl and change status of the bowl 
+					// and the cat to not eating (0)
+                                        bowls[1] = 0;
+                                        lock_release(bowl1);
+                                        cat[catnumber] = 0;
+
+                                        it_c[catnumber]++;
+                                }
+				// If both bowls are used.
+                                else if (bowls[0] == 1 && bowls[1] == 1)
+                                {
+                                        it_c[catnumber] == it_c[catnumber]; //no change, go back to and loop until free bowl found
+                                }
+ 
+                        }
+			// Relenquish access to the bowl's status
+                        lock_release(mutex);
+                }
+        }
+}
+	
+
+/*
+ * mouselock()
+ *
+ * Arguments:
+ *      void * unusedpointer: currently unused.
+ *      unsigned long mousenumber: holds the mouse identifier from 0 to 
+ *              NMICE - 1.
+ *
+ * Returns:
+ *      nothing.
+ *
+ * Notes:
+ *      Write and comment this function using locks/cv's.
+ *
+ */
+
+static
+void
+mouselock(void * unusedpointer,
+          unsigned long mousenumber)
+{
+	while (it_m[mousenumber] < 4)
+        {
+                if (mouse[mousenumber] == 0)
+                {
+                        lock_acquire(mutex);
+                        if (cat[0] != 1 && cat[1] != 1 && cat[2] != 1 && cat[3] != 1 && cat[4] != 1 && cat[5] != 1) //make sure no cats are eating
+                        {
+                                if (bowls[0] == 0 && bowls[0] == 0) //choose random bowl as both are empty
+                                {
+                                        int num = random() % 2;
+                                        if (num == 0)
+                                        {
+                                                lock_acquire(bowl0);
+                                                bowls[0]=1;
+                                                mouse[mousenumber]=1;
+                                                lock_release(mutex);
+                                                lock_eat("mouse", mousenumber, 1, it_m[mousenumber]);
+                                                lock_acquire(mutex);
+                                                bowls[0]=0;
+                                                lock_release(bowl0);
+                                                mouse[mousenumber]=0;
+                                                it_m[mousenumber]++;
+                                        }                                      
+                                        else if (num == 1)
+                                        {
+                                                lock_acquire(bowl1);
+                                                bowls[1]=1;
+                                                mouse[mousenumber]=1;
+                                                lock_release(mutex);
+                                                lock_eat("mouse", mousenumber, 2, it_m[mousenumber]);
+                                                lock_acquire(mutex);
+                                                bowls[1]=0;
+                                                lock_release(bowl1);
+                                                mouse[mousenumber]=0;
+                                                it_m[mousenumber]++;
+                                        }
+                                }
+                                else if (bowls[0] == 0 && bowls[1] == 1) //bowl 1 free, bowl 2 used by fellow mouse
+                                {
+                                        lock_acquire(bowl0);
+                                        bowls[0]=1;
+                                        mouse[mousenumber]=1;
+                                        lock_release(mutex);
+                                        lock_eat("mouse", mousenumber, 1, it_m[mousenumber]);
+                                        lock_acquire(mutex);
+                                        bowls[0]=0;
+                                        lock_release(bowl0);
+                                        mouse[mousenumber]=0;
+                                        it_m[mousenumber]++;
+                                }
+                                else if (bowls[0] == 1 && bowls[1] == 0) //bowl 2 free, bowl 1 used by fellow mouse
+                                {
+                                        lock_acquire(bowl1);
+                                        bowls[1]=1;
+                                        mouse[mousenumber]=1;
+                                        lock_release(mutex);
+                                        lock_eat("mouse", mousenumber, 2, it_m[mousenumber]);
+                                        lock_acquire(mutex);
+                                        bowls[1]=0;
+                                        lock_release(bowl1);
+                                        mouse[mousenumber]=0;
+                                        it_m[mousenumber]++;
+                                }
+                                else if (bowls[0] == 1 && bowls[1] == 1)
+                                {
+                                        it_m[mousenumber] == it_m[mousenumber]; //no change, go back and wait
+                                }
+                        }
+                        lock_release(mutex);
+                }
+        }
+}
+
+
+/*
+ * catmouselock()
+ *
+ * Arguments:
+ *      int nargs: unused.
+ *      char ** args: unused.
+ *
+ * Returns:
+ *      0 on success.
+ *
+ * Notes:
+ *      Driver code to start up catlock() and mouselock() threads.  Change
+ *      this code as necessary for your solution.
+ */
+
+int
+catmouselock(int nargs,
+             char ** args)
+{
+	// Create feeding bowls        
+	bowl0 = lock_create("bowl0");
+    bowl1 = lock_create("bowl1");
+
+	// Create mutex
+    mutex = lock_create("mutex");
+       
+    int index, error;
+   
+        /*
+         * Avoid unused variable warnings.
+         */
+ 
+        (void) nargs;
+        (void) args;
+   
+        /*
+         * Start NCATS catlock() threads.
+         */
+ 
+        for (index = 0; index < NCATS; index++) {
+           
+                error = thread_fork("catlock thread",
+                                    NULL,
+                                    index,
+                                    catlock,
+                                    NULL
+                                    );
+               
+                /*
+                 * panic() on error.
+                 */
+ 
+                if (error) {
+                 
+                        panic("catlock: thread_fork failed: %s\n",
+                              strerror(error)
+                              );
+                }
+        }
+ 
+        /*
+         * Start NMICE mouselock() threads.
+         */
+ 
+        for (index = 0; index < NMICE; index++) {
+   
+                error = thread_fork("mouselock thread",
+                                    NULL,
+                                    index,
+                                    mouselock,
+                                    NULL
+                                    );
+     
+                /*
+                 * panic() on error.
+                 */
+ 
+                if (error) {
+         
+                        panic("mouselock: thread_fork failed: %s\n",
+                              strerror(error)
+                              );
+                }
+        }
+ 
+        return 0;
+}
+
+/*
+ * End of catlock.c
+ */
