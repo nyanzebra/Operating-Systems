@@ -146,7 +146,8 @@ We will base it off of runprogram(). It must accomplish the following:
 	- Replace the address space of the process
 		- Should the new address space be of the same size?
 	- similar to fork
-	- Create a 'new' process in that it performs new task (elf, stack, all new stuff)
+	- Create a 'new' process in that it performs new task (elf, stack, all 
+	new stuff)
 	- Copy the passed arguments to the new process
 
 + waitpid
