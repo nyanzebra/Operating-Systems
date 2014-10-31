@@ -1,76 +1,200 @@
+COMP 3500 Project 4
+Robert Baldwin ()
+Jonathan Hart
+
+
 Design Document
 ===============
 
-This project involves delving into the kernel with goal of implementing user applications. A variety of System calls will be implemented; some process related and others being file related. Some data structures will either need to be found or constructed in order to implement a well functioning operation. The remainder of this document will discuss implementation details in the form of possible data structures (being used and created), and scenarios that must be addressed for a function.
+This project involves delving into the kernel with goal of implementing user 
+applications. A variety of System calls will be implemented; some process 
+related and others being file related. Some data structures will either need 
+to be found or constructed in order to implement a well functioning operation. 
+The remainder of this document will discuss implementation details in the form 
+of possible data structures (being used and created), and scenarios that must 
+be addressed for a function.
 
 Data Structures
 ===============
 
-The system calls in question are related to files and processes, therefore at minimum a representation of process and file are required. These representations are given in the form of pid (process identifier) and fid (file identifier). 
+The system calls in question are related to files and processes, therefore 
+at minimum a representation of process and file are required. These 
+representations are given in the form of pid (process identifier) and 
+fid (file identifier). 
 
-Files need to be stored if multiple openings are allowed, this can be done with a map of fid to node(file). This approach is consistent with cs161 and allows for use vfspath as a basis for implementing file system calls. 
+Files need to be stored if multiple openings are allowed, this can be done 
+with a map of fid to node(file). This approach is consistent with cs161 and 
+allows for use vfspath as a basis for implementing file system calls. 
 
-Processes need to be stored in a queue (already handled with global queue) for scheduling. Processes have a pid which can contain additional information on a process such as "siblings" or "children". Processes must have threads of execution as well. proc.h will be a good base for implementing the process methods with existing data structures.
+Open files must have information describing them stored in a structure. This
+structure contains a vnode pointer to the file's data, an offset for file
+reading, a file ID, and a counter representing the number of owneer processes.
+
+Processes need to be stored in a queue (already handled with global queue) 
+for scheduling. Processes have a pid which can contain additional information 
+on a process such as "siblings" or "children". Processes must have threads of 
+execution as well. proc.h will be a good base for implementing the process 
+methods with existing data structures.
 
 Scheduler
 =========
 
-In terms of scheduling the Round-Robin scheduling model is relatively poor for the small single processes that the OS implements currently. For instance the use of systemcalls (the extent or range of application the OS can handle) will be in terms of processes just the thread for the kernel and the threads for exec and fork (creating threads/processes of same size). This hints at using either a Priority model or First come model. Priority has the issue of starvation but with some additions this can be avoided. By making priority be a function of time waiting, size, and kernel/not we can ensure that each process does not starve. The other possibility is the First come in that despite the fact it is not efficiently turning around processes it will do well in this small scale. This is because each process is either kernel or userprogram, this leads to [kern][user][kern] which will ensure no starvation and will ensure execution of programs immediately (low wait time).
+In terms of scheduling the Round-Robin scheduling model is relatively poor 
+for the small single processes that the OS implements currently. For instance 
+the use of systemcalls (the extent or range of application the OS can handle) 
+will be in terms of processes just the thread for the kernel and the threads 
+for exec and fork (creating threads/processes of same size). This hints at 
+using either a Priority model or First come model. Priority has the issue of 
+starvation but with some additions this can be avoided. By making priority be 
+a function of time waiting, size, and kernel/not we can ensure that each 
+process does not starve. The other possibility is the First come in that 
+despite the fact it is not efficiently turning around processes it will do 
+well in this small scale. This is because each process is either kernel or 
+userprogram, this leads to [kern][user][kern] which will ensure no starvation 
+and will ensure execution of programs immediately (low wait time).
+
 
 Objectives / Exceptions
 =======================
 
-File
-----
+File syscalls
+-------------
 
 + open 
-	- file must exist
-	- must use valid flag
-	- must use valid mode/state
-	- must create an identifier at least
-	- should probably create / add to a map
+
+The open() syscall function must do the following:
+	- ensure given file exists
+	- use valid flags
+	- set a valid mode/state
+	- create a file identifier 
+	- add the newly created file identifier to our file table
+	- set the data for the opened file (using vfs_open)
+	- set the offset in our file identifier pointing to the 
+	beginning of the file
+
 + read
-	- file must be open (could mean 'must be in map')
-	- cannot read more than in file (cannot read past end)
+
+The read() syscall function must ensure the following:
+	- check that the file is currently open
+	- does not attempt to read greater than the end of the file
 	- must not change file
+
 + write
+
+The write() syscall function ensure the following:
 	- file must be open
 	- must change file
+
+Write will call VOP_WRITE to handle the actual file writing.
+
 + lseek
+
+The lseek() syscall function must satisfy these conditions:
 	- file must be open
 	- file must return '\0' if past size of file
 	- must move to offset (where a char is in a file...)
 	- must support seek_set, seek_cur, seek_end
 	- inputs must be valid
-+ close
-	- file must be open
-	- file must ACTUALLY be closed
-+ dup2
-	- should probably close old file
-	- new file must be copy of old
-	- update map?
-	- they must be references of one another! change in one changes other automatically!
 
-Process
--------
+Lseek will call VOP_TRYSEEK to determine if the file offset is 
+legal/update offest position.
+
++ close
+
+The close() syscall must enusre the following:
+	- file must be open when called
+	- file must be closed when call is completed
+	- file descriptor associated from file must be removed from the file table
+
++ dup2
+
+The dup2() syscall must ensure the following:
+	- create a copy of the file
+	- migrate the old file's file descriptor to a new file descriptor
+	- close the old file (call close syscall to remove file descriptor)
+	- add the new file's file descriptor to the file table
+
+Processes
+---------
 
 + getpid
 	- must return identifier of current process (will be >= 0)
+
 + fork
-	- must be copy of current process
-	- must return 0 for a child and new pid for parent
-	- must send error if not enough resources
-	- copying pid should solve all other copy issues! (get corresponding process data)
-	- need to have same address space?
+
+The fork() system call will create a copy of the process that invokes it. Fork
+must be able to accomplish the folowing tasks:
+
+	- copy the calling process
+	- copy the file table to the new process
+	- get a new PID for the new process
+	- return 0 for a child and new pid for parent
+	- return an error if not enough resources
+	- duplicate the calling process's address space
+
+Our fork() function will check to ensure there is enough memory avaliable, copy
+the calling process' trapframe, and then call thread_fork to handle the
+creation of the new thread.
+
+The child thread will call md_forkentry to copy and set the trapframe for the
+new process. It will also set the return value to 0 for the child.
+
 + execv
+
+The execv() system call will handle the execution in newly created processes. 
+We will base it off of runprogram(). It must accomplish the following:
+	- Replace the address space of the process
+		- Should the new address space be of the same size?
 	- similar to fork
-	- must have new address space of same size?
-	- must create a 'new' process in that it performs new task (elf, stack, all new stuff)
+	- Create a 'new' process in that it performs new task (elf, stack, all new stuff)
+	- Copy the passed arguments to the new process
+
 + waitpid
+
+The waitpid() system call will wait for a specified process to exit. Waitpid() 
+must accomplish the following:
 	- must support sign
-	- must support options of WNOHANG, WUNTRACED, WCONTINUED, WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WCOREDUMP, WIFSTOPPED, WSTOPSIG, WIFCONTINUED
+	- must support the following options: 
+		WNOHANG, WUNTRACED, WCONTINUED, WIFEXITED, WEXITSTATUS, WIFSIGNALED, 
+		WTERMSIG, WCOREDUMP, WIFSTOPPED, WSTOPSIG, WIFCONTINUED
 	- must wait until child process (pid) has changed state
+
+Waitpid() should use a lock and condition variable to syncronize access to the 
+PID we are waiting. This ensures other processes will not also access the PID 
+while we are waiting on it.
+
 + _exit
-	- must close everything process holds
-	- must terminate process
-	- must return status to parent
+The _exit system call will release the process resources. This must:
+
+	- close everything the process holds
+	- terminate the process
+	- return the process status to its parent
+	- wake the parent thread
+
+Considered Alternatives
+=======================
+
+We originally considered implementing a "file table" just as an OS/161 array.
+However, we found that working directly with OS/161's array implementation
+to be cumbersome, so we created a wrapper class specifically for file table.
+
+Pros and Cons to Our Approach
+=============================
+
+Our creation of a file table helper class allowed us to increase the modularity
+and readability of our code. This allows us to create consistant access
+functions and then change them as we sit fit throughout the development 
+processs with litle negative effect on their usage in our file access and
+process management code.
+
+However, the use of a wrapper class does increase overhead. Our file table
+opperations could have been accomplished with standard OS/161 array
+implementation operations, creating our own encapsulated wrapper provided
+aditional convience when modifying the contents of the file table.
+
+Submission Note
+===============
+Per the project specification, our submission includes this document, a 
+script of the OS/161 shell demonstrating cat, rm, cp, and pwn, and a script
+of OS/161 running tt* tests successfully. If further submission materials 
+are required, they can be provided.
