@@ -192,10 +192,3 @@ However, the use of a wrapper class does increase overhead. Our file table
 opperations could have been accomplished with standard OS/161 array
 implementation operations, creating our own encapsulated wrapper provided
 aditional convience when modifying the contents of the file table.
-
-Submission Note
-===============
-Per the project specification, our submission includes this document, a 
-script of the OS/161 shell demonstrating cat, rm, cp, and pwn, and a script
-of OS/161 running tt* tests successfully. If further submission materials 
-are required, they can be provided.
